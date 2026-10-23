@@ -1,0 +1,25 @@
+# Runtime data, login state, private journals and downloaded tools
+data/
+vendor/
+output/
+dist/
+test-results/
+node_modules/
+.env
+.env.*
+!.env.example
+cookies.json*
+secrets.json
+fish-diary*.md
+*.log
+*.tmp
+*.download
+*.exe
+*.zip
+*.bak
+fish/fish.cmd
+fish/fish.sh
+TEST-RESULT-*.md
+VALIDATION.md
+.DS_Store
+Thumbs.db

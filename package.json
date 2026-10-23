@@ -1,0 +1,55 @@
+{
+  "name": "dsh-xhs-whale",
+  "version": "0.2.0",
+  "description": "小红书阅读助手：筛选、图文阅读、回复草稿与审核发送；养鱼自动唤醒、自己刷、区分评论",
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node tools/xhs.mjs serve",
+    "demo": "node tools/xhs.mjs serve --demo",
+    "test": "node --test test/*.test.js",
+    "package:source": "node tools/package-release.mjs",
+    "test:demo": "node tools/smoke-demo.mjs"
+  },
+  "files": [
+    "lib",
+    "public",
+    "tools",
+    "scripts",
+    "fish",
+    "cordis.patch.yml",
+    "README.md",
+    "NOTICE.md",
+    "upstream",
+    "licenses",
+    "LICENSE",
+    "docs",
+    "examples"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [],
+      "platform": "web"
+    }
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zhouzhounb520/dsh-xhs-whale.git"
+  },
+  "homepage": "https://github.com/Zhouzhounb520/dsh-xhs-whale#readme",
+  "bugs": {
+    "url": "https://github.com/Zhouzhounb520/dsh-xhs-whale/issues"
+  }
+}
