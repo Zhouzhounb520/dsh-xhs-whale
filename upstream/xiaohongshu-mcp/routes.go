@@ -1,0 +1,77 @@
+// Distributed in the modified dsh-xhs-whale source snapshot. See MODIFICATIONS.md.
+package main
+
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
+)
+
+// setupRoutes 设置路由配置
+func setupRoutes(appServer *AppServer) *gin.Engine {
+	// 设置 Gin 模式
+	gin.SetMode(gin.ReleaseMode)
+
+	router := gin.New()
+	router.Use(gin.Logger())
+	router.Use(gin.Recovery())
+
+	// 添加中间件
+	router.Use(errorHandlingMiddleware())
+	router.Use(corsMiddleware())
+
+	// 健康检查
+	router.GET("/health", healthHandler)
+
+	// MCP 端点 - 使用官方 SDK 的 Streamable HTTP Handler
+	mcpHandler := mcp.NewStreamableHTTPHandler(
+		func(r *http.Request) *mcp.Server {
+			return appServer.mcpServer
+		},
+		&mcp.StreamableHTTPOptions{
+			JSONResponse: true, // 支持 JSON 响应
+			// 换取客户端可跳过 initialize 握手直接调工具。代价是服务端无法反向
+			// 请求客户端（sampling / elicitation / roots），眼下一处都没用到；
+			// 要用得先摘掉这行。
+			Stateless: true,
+		},
+	)
+	protected := router.Group("")
+	protected.Use(authMiddleware(appServer.authToken))
+
+	protected.Any("/mcp", gin.WrapH(mcpHandler))
+	protected.Any("/mcp/*path", gin.WrapH(mcpHandler))
+
+	// API 路由组
+	api := protected.Group("/api/v1")
+	{
+		api.GET("/capabilities", func(c *gin.Context) {
+			c.JSON(200, gin.H{"success": true, "data": gin.H{"checked_comments": 1, "real_mentions": 1, "owner_resolve": 1}})
+		})
+		api.POST("/feeds/comment/checked", appServer.checkedCommentHandler)
+		api.POST("/users/resolve", appServer.resolveOwnerHandler)
+		api.GET("/login/status", appServer.checkLoginStatusHandler)
+		api.GET("/login/qrcode", appServer.getLoginQrcodeHandler)
+		api.DELETE("/login/cookies", appServer.deleteCookiesHandler)
+		api.POST("/publish", appServer.publishHandler)
+		api.POST("/publish_video", appServer.publishVideoHandler)
+		api.GET("/feeds/list", appServer.listFeedsHandler)
+		api.GET("/feeds/search", appServer.searchFeedsHandler)
+		api.POST("/feeds/search", appServer.searchFeedsHandler)
+		api.POST("/feeds/detail", appServer.getFeedDetailHandler)
+		api.POST("/user/profile", appServer.userProfileHandler)
+		api.POST("/feeds/comment", appServer.postCommentHandler)
+		api.POST("/feeds/comment/reply", appServer.replyCommentHandler)
+		api.POST("/feeds/like", appServer.likeFeedHandler)
+		api.POST("/feeds/favorite", appServer.favoriteFeedHandler)
+		api.GET("/user/me", appServer.myProfileHandler)
+		api.GET("/notifications/unread", appServer.getUnreadCountHandler)
+		api.GET("/notifications/list", appServer.listNotificationsHandler)
+		api.POST("/notifications/list", appServer.listNotificationsHandler)
+		api.POST("/notifications/reply", appServer.replyNotificationHandler)
+		api.POST("/notifications/like", appServer.likeNotificationHandler)
+	}
+
+	return router
+}
