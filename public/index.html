@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>小红书阅读助手</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/"><span class="brand-icon">阅</span><span>小红书阅读助手<small>READ · THINK · REPLY</small></span></a>
+    <div class="nav-label">工作台</div>
+    <nav aria-label="主导航">
+      <button class="nav active" data-tab="explore"><span>◈</span>发现与阅读</button>
+      <button class="nav" data-tab="drafts"><span>✎</span>回复草稿 <b id="draft-count">0</b></button>
+      <button class="nav" data-tab="history"><span>◷</span>阅读记录</button>
+      <button class="nav" data-tab="fish"><span>🐟</span>养鱼 <b id="fish-badge" hidden>0</b></button>
+      <button class="nav" data-tab="settings"><span>⚙</span>连接设置</button>
+    </nav>
+    <div class="sidebar-foot"><span class="dot"></span><span id="mode-label">本地工作台</span><small>你的偏好，每次都可以改变。</small><span class="version">养鱼版 · v0.2.0</span></div>
+  </aside>
+  <main>
+    <header class="topbar"><span id="breadcrumb">工作台 / 发现与阅读</span><span class="pill" id="mode-pill">正在连接</span></header>
+    <div id="demo-banner" class="banner" hidden>演示模式 · 帖子、作者和评分均为虚构；未访问小红书，也不会发送评论。<a href="http://127.0.0.1:18061" target="_blank" rel="noreferrer">打开正式版 ↗</a></div>
+    <div id="toast" role="status" aria-live="polite" hidden></div>
+    <section id="verification-panel" class="banner" aria-live="polite" hidden>
+      <strong>已暂停 · 需要你检查小红书验证页面</strong>
+      <p id="verification-message"></p>
+      <p>打开独立窗口后，亲自完成验证码或登录，确认能正常浏览。窗口会保留到你保存或关闭；验证过程不自动搜索、点赞或回复。</p>
+      <div class="button-row">
+        <button id="verification-open" class="primary">打开验证窗口</button>
+        <button id="verification-complete" class="secondary" disabled>我已完成，保存并解除暂停</button>
+        <button id="verification-close" class="secondary" disabled>关闭窗口，保持暂停</button>
+      </div>
+      <p class="hint">解除暂停后定时任务可继续，失败的阅读任务需重新开始。若仍遇到限流，请等待平台恢复。</p>
+    </section>
+    <section id="explore" class="pane">
+      <div class="heading"><div><div class="eyebrow">A LITTLE LESS SCROLLING</div><h1>把值得的内容，读进去。</h1><p>从你的兴趣出发，筛选笔记、理解图文，再认真回复。</p></div><div class="heading-mark">阅<span>读有所获</span></div></div>
+      <div class="setup-hint" id="setup-hint" hidden>开始前，先完成小红书登录与 DeepSeek 连接。<button class="text-button" data-tab="settings">前往设置 →</button></div>
+      <form id="search-form" class="search-panel">
+        <div class="search-line"><label class="sr-only" for="keyword">搜索关键词</label><span class="search-symbol">⌕</span><input id="keyword" placeholder="今天想读些什么？例如：科研效率、周末徒步、收纳" maxlength="120"><button type="submit" class="primary" id="start-button">开始筛选 <span>→</span></button></div>
+        <div class="preferences">
+          <label>这次想重点了解<input id="interests" placeholder="例如：有具体步骤、适合新手的经验" maxlength="1500"></label>
+          <label>这次不想看<input id="excludes" placeholder="例如：广告带货、纯搬运" maxlength="1500"></label>
+        </div>
+        <div class="filter-row">
+          <select id="source" aria-label="内容来源"><option value="search">关键词搜索</option><option value="feed">首页推荐</option></select>
+          <select id="sort" aria-label="排序方式"><option>综合</option><option>最新</option><option>最多收藏</option><option>最多点赞</option><option>最多评论</option></select>
+          <select id="publish" aria-label="发布时间"><option value="不限">不限时间</option><option>一天内</option><option>一周内</option><option>半年内</option></select>
+          <label class="check"><input type="checkbox" id="skip-read" checked>跳过已精读</label><span class="hint">偏好仅用于本次任务</span>
+        </div>
+      </form>
+      <div id="progress" class="progress" hidden><span class="spinner"></span><span id="progress-text"></span><button id="cancel-run" class="text-button">停止后续步骤</button></div>
+      <div class="section-title"><h2>本次阅读</h2><div id="run-actions" hidden><button id="export-run" class="secondary small">导出 Markdown ↗</button></div></div>
+      <div id="run-meta" class="hint"></div>
+      <div id="results" class="results"></div>
+      <div id="empty" class="empty"><div class="empty-symbol">▤</div><h3>从一个好奇心开始</h3><p>输入关键词，助手会先筛选，再深入阅读。<br>你会看到推荐理由、原文依据与评论中的问题。</p><div class="steps"><span>01 获取候选</span><i>→</i><span>02 筛选精读</span><i>→</i><span>03 审核回复</span></div></div>
+    </section>
+    <section id="drafts" class="pane" hidden>
+      <div class="heading"><div><div class="eyebrow">WORDS WORTH SENDING</div><h1>每一句，先过你这一关。</h1><p>核对原帖和目标评论，修改草稿后再确认发送。</p></div></div>
+      <div id="draft-list"></div>
+    </section>
+    <section id="history" class="pane" hidden>
+      <div class="heading"><div><div class="eyebrow">YOUR READING TRAIL</div><h1>读过的，留得下来。</h1><p>阅读记录保存在本机。点击任务可以回看结果或导出。</p></div></div>
+      <div id="history-list"></div>
+    </section>
+    <section id="fish" class="pane" hidden>
+      <div class="heading"><div><div class="eyebrow">A FISH WITH A LIFE</div><h1>让它自己过日子。</h1><p>到点自己醒，自己刷小红书，分清谁在说话；你只需要偶尔看一眼。</p></div><div class="heading-mark">鱼<span>自有作息</span></div></div>
+      <div id="fish-status" class="fish-status"></div>
+      <div id="fish-warnings"></div>
+      <div id="fish-selftest-out" class="fish-selftest" hidden></div>
+
+      <div class="section-title"><h2>作息、人设与分寸</h2><span class="hint" id="fish-save-hint"></span></div>
+      <form id="fish-form" class="fish-form">
+        <div class="settings-grid">
+          <div class="box"><h2><span class="step-number">01</span>她是谁</h2>
+            <label>名字<input name="personaName" maxlength="40" placeholder="例如：小鲸鱼"></label>
+            <label>怎么称呼你<input name="personaOwner" maxlength="20" placeholder="例如：主人（留空就中性）"></label>
+            <label>她自称<input name="personaSelf" maxlength="20" placeholder="例如：我"></label>
+            <p class="hint">人设只影响语气；红线与流程写在 fish/AGENTS.md，可以直接改那个文件。</p>
+          </div>
+          <div class="box"><h2><span class="step-number">02</span>作息</h2>
+            <div class="fish-windows" id="fish-windows"></div>
+            <div class="button-row"><button type="button" id="fish-add-window" class="secondary small">+ 添加窗口</button></div>
+            <div class="number-grid">
+              <label>每天最多醒<input name="maxWakes" type="number" min="0" max="12"></label>
+              <label>每段至少醒<input name="minWakes" type="number" min="0" max="12" value="1"></label>
+              <label>不看概率 %<input name="skipChance" type="number" min="0" max="95" step="5"></label>
+            </div>
+            <p class="hint">每段先完成最低醒来次数，剩余次数才随机决定看不看；不看只结束当前时段。窗口内随机醒来，DSH 需要保持运行。</p>
+          </div>
+          <div class="box"><h2><span class="step-number">03</span>刷什么</h2>
+            <label>主题（一行一个，会轮换）<textarea name="topics" rows="3" placeholder="例如：&#10;游戏&#10;交友&#10;读书"></textarea></label>
+            <label>来源<select name="source"><option value="auto">先关键词，失败退回首页</option><option value="feed">只看首页推荐</option><option value="search">只用关键词搜索</option></select></label>
+            <div class="number-grid">
+              <label>每轮候选<input name="candidates" type="number" min="1" max="30"></label>
+              <label>读取详情<input name="shortlist" type="number" min="1" max="8"></label>
+              <label>精读<input name="deep" type="number" min="0" max="5"></label>
+            </div>
+            <div class="number-grid">
+              <label>排序<select name="sort"><option>最新</option><option>综合</option><option>最多点赞</option><option>最多评论</option><option>最多收藏</option></select></label>
+              <label>时间范围<select name="publish"><option>一天内</option><option>一周内</option><option>半年内</option><option>不限</option></select></label>
+            </div>
+            <label class="check"><input name="localEnabled" type="checkbox">优先刷同城（城市名参与搜索）</label>
+            <div class="number-grid">
+              <label>城市<input name="city" maxlength="20" placeholder="北京"></label>
+              <label>同城条数<input name="localCount" type="number" min="0" max="10"></label>
+            </div>
+            <label class="check"><input name="filtersEnabled" type="checkbox">同时用平台筛选（排序/时间/位置）</label>
+            <p class="hint">开启平台筛选可按最新、时间范围和同城查找；默认关闭时，用城市关键词和发布时间排序。普通筛选错误会退回不带筛选，疑似验证或限流则暂停，等待你处理。</p>
+            <p class="hint">每轮先刷几条同城相关帖子，再刷其余，至少留 1 条给非限地域的结果。出现验证提示时，请在页面上方打开人工验证窗口。</p>
+          </div>
+          <div class="box"><h2><span class="step-number">04</span>分享与倾听</h2>
+            <label class="check"><input name="shareEnabled" type="checkbox">允许它主动分享（在笔记下发评论）</label>
+            <label class="check"><input name="mentionOwner" type="checkbox">分享评论中真实 @ 主人来看（需评论修复版服务）</label>
+            <label class="check"><input name="likeEnabled" type="checkbox">允许它给不错的帖子点赞</label>
+            <div class="number-grid">
+              <label>每天点赞上限<input name="likeDaily" type="number" min="0" max="50"></label>
+            </div>
+            <label>主人的小红书号或主页用户 ID<input name="ownerUserId" maxlength="100" placeholder="例如：10000000001；也可填个人主页链接中的用户 ID"></label>
+            <button type="button" id="resolve-owner" class="secondary small">保存并核实主人</button><p id="owner-resolution" class="hint"></p>
+            <label class="check"><input name="ownerDirect" type="checkbox">主人的评论直接回（不用我审）</label>
+            <label>其他人的评论<select name="strangerPolicy">
+              <option value="draft">只写草稿，等我审（推荐）</option>
+              <option value="off">不回</option>
+              <option value="direct">也直接回（不推荐）</option>
+            </select></label>
+            <p class="hint">同一条笔记 7 天内只分享一次；同一条评论永远只回一次。所有发送还要过「允许发送评论」主开关。</p>
+            <label class="check"><input name="visitEnabled" type="checkbox">回复后偶尔去评论者的作品串门</label>
+            <div class="number-grid">
+              <label>回访概率 %<input name="visitChance" type="number" min="0" max="100" value="30"></label>
+              <label>同一人间隔（小时）<input name="visitCooldown" type="number" min="1" max="720" value="72"></label>
+            </div>
+            <p class="hint">只阅读作品、准备留言并提醒主人手动完成；不自动点赞或发送，每批最多回访一人。</p>
+          </div>
+          <div class="box"><h2><span class="step-number">05</span>监听与推送</h2>
+            <label class="check"><input name="listenEnabled" type="checkbox">监听谁回复了它</label>
+            <label class="check"><input name="listenAllDay" type="checkbox">全天监听（否则只在作息窗口内）</label>
+            <div class="number-grid"><label>扫描间隔（秒）<input name="listenInterval" type="number" min="120" max="3600"></label></div>
+            <label class="check"><input name="diaryPush" type="checkbox">把日记里的话推给我</label>
+            <label>推送方式<select name="notifyType"><option value="workbench">只在这里显示</option><option value="webhook">Webhook</option><option value="none">不推送</option></select></label>
+            <label>Webhook 地址<input name="notifyUrl" type="url" placeholder="https://open.feishu.cn/..."></label>
+          </div>
+        </div>
+        <div class="save-bar"><span class="hint">改完点保存；保存后生物钟立刻按新作息重算。</span><button type="submit" class="primary">保存养鱼设置</button></div>
+      </form>
+
+      <div class="section-title"><h2>收件箱</h2><button type="button" id="fish-scan" class="secondary small">立即扫一次</button><button type="button" id="fish-selftest" class="secondary small">启动测试</button><span class="hint" id="fish-scan-hint"></span></div>
+      <div id="fish-inbox"></div>
+
+      <div class="section-title"><h2>两本日记</h2></div>
+      <div class="diary-grid">
+        <article class="diary"><h3>给主人的信</h3><pre id="fish-diary-letter">（还没写）</pre></article>
+        <article class="diary"><h3>自己的日记</h3><pre id="fish-diary-private">（还没写）</pre></article>
+      </div>
+
+      <div class="section-title"><h2>最近推送</h2></div>
+      <div id="fish-notices"></div>
+    </section>
+    <section id="settings" class="pane" hidden>
+      <div class="heading"><div><div class="eyebrow">MAKE YOURSELF AT HOME</div><h1>连接好，就可以开始。</h1><p>密钥只提交到本地服务，保存后不回显。正式分析会将选中的帖子内容发送给 DeepSeek。</p></div></div>
+      <form id="settings-form">
+        <div class="settings-grid">
+          <div class="box"><h2><span class="step-number">01</span>小红书连接</h2>
+            <label>服务地址<input name="xhsUrl" type="url" required></label>
+            <label>服务令牌（上游配置了鉴权时填写）<input name="xhsToken" type="password" autocomplete="new-password" placeholder="留空保留已保存的令牌"></label>
+            <p class="hint" id="xhs-token-state"></p>
+            <div class="button-row"><button type="button" id="check-login" class="secondary">检查登录</button><button type="button" id="get-qr" class="secondary">扫码登录</button><button type="button" id="manual-verification" class="secondary">人工验证</button></div>
+            <div id="login-status" class="result-message">保存设置后，再检查连接。</div>
+            <img id="qr-image" alt="小红书登录二维码" hidden>
+            <p class="hint">连接不上时，运行项目中的「启动小红书服务.ps1」。</p>
+          </div>
+          <div class="box"><h2><span class="step-number">02</span>DeepSeek 模型</h2>
+            <label>API Key<input name="apiKey" type="password" autocomplete="new-password" placeholder="留空保留已保存的密钥"></label>
+            <p class="hint" id="key-state"></p>
+            <label>阅读模型<select name="model"><option value="deepseek-flash">DeepSeek Flash · 支持图文阅读</option><option value="deepseek-v4-pro">DeepSeek V4 Pro · 仅文本阅读</option></select></label>
+            <button type="button" id="test-model" class="secondary">测试模型连接</button>
+            <div id="model-status" class="result-message">使用独立 API Key；不会读取 DSH 的账号凭据。</div>
+          </div>
+          <div class="box"><h2><span class="step-number">03</span>阅读与筛选</h2>
+            <label>默认兴趣<input name="interests" placeholder="可留空，每次搜索临时填写"></label>
+            <label>默认排除词<input name="excludes"></label>
+            <div class="number-grid">
+              <label>候选上限<input name="candidateLimit" type="number" min="1" max="30"></label>
+              <label>详情读取<input name="shortlistLimit" type="number" min="1" max="8"></label>
+              <label>精读数量<input name="deepReadLimit" type="number" min="1" max="5"></label>
+              <label>每帖附图<input name="imageLimit" type="number" min="0" max="9"></label>
+              <label>一级评论上限<input name="commentLimit" type="number" min="5" max="50"></label>
+            </div>
+            <p class="hint">未附图会在阅读范围中注明。第一版不分析视频本体。</p>
+          </div>
+          <div class="box"><h2><span class="step-number">04</span>审核发送</h2>
+            <label class="check"><input name="sendingEnabled" type="checkbox">允许在审核后发送评论</label>
+            <label>回复风格<textarea name="replyStyle" rows="3"></textarea></label>
+            <p class="hint">每条草稿都需确认。发送结果不确定时会暂停该条回复，核对前不重发。</p>
+          </div>
+        </div>
+        <div class="save-bar"><span id="settings-message" class="hint">设置保存在本机 data 目录。</span><button type="submit" class="primary">保存全部设置</button></div>
+      </form>
+    </section>
+  </main>
+  <dialog id="note-dialog"><div class="dialog-top"><span>阅读详情</span><button id="close-note" class="icon-button" aria-label="关闭详情">×</button></div><div id="note-content"></div></dialog>
+  <dialog id="send-dialog"><div class="dialog-top"><span>确认发送</span><button id="close-send" class="icon-button" aria-label="取消发送">×</button></div><div class="confirm-body"><h2 id="send-title"></h2><p id="send-target"></p><div id="send-preview" class="quote"></div><p class="hint" id="send-account"></p><div class="button-row"><button id="confirm-send" class="primary">确认，以此账号发送</button><button id="cancel-send" class="secondary">返回修改</button></div></div></dialog>
+</body>
+</html>
