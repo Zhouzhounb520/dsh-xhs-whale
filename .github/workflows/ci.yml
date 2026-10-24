@@ -1,0 +1,38 @@
+name: Offline checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  javascript:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test test/*.test.js
+      - name: Demo smoke check
+        run: node tools/smoke-demo.mjs
+      - name: Windows launcher helpers
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: ./test/start-service.ps1
+      - name: Source package validation
+        run: node tools/package-release.mjs
+  service:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: upstream/xiaohongshu-mcp/go.mod
+          cache-dependency-path: upstream/xiaohongshu-mcp/go.sum
+      - name: Checked service tests and build
+        shell: powershell
+        run: ./scripts/构建评论修复版.ps1
