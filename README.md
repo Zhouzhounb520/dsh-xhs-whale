@@ -6,7 +6,7 @@
 
 在本机运行的 DeepSeek 图文阅读工作台，也可以作为 DSH（DeepSeek Harness）插件，为小鲸鱼设置人设、作息和互动方式。
 
-灵感来自 [dsh-bili-whale](https://github.com/Alterssss/dsh-bili-whale)，平台操作基于 [xiaohongshu-mcp](https://github.com/xpzouying/xiaohongshu-mcp)。当前版本 **0.2.0 · 实验版**，主要面向 Windows x64。
+灵感来自 [dsh-bili-whale](https://github.com/Alterssss/dsh-bili-whale)，平台操作基于 [xiaohongshu-mcp](https://github.com/xpzouying/xiaohongshu-mcp)。当前版本 **0.2.0 · 实验版**，面向 Windows x64。
 
 ## 功能
 
@@ -18,7 +18,7 @@
 | 评论与回复 | 生成草稿、人工审核；开启发送后可按养鱼策略评论、回复 |
 | 点赞与分享 | 按设置点赞；使用修改版服务选择平台真实 @ 主人候选 |
 | 评论收件箱 | 区分自己、主人、其他用户；陌生人默认进入草稿 |
-| 评论回访 | 访问近期互动者的主页、阅读作品、准备留言并提醒主人；当前由主人手动点赞和发送 |
+| 评论回访 | 访问近期互动者的主页、阅读作品、准备留言并提醒主人 |
 | 验证处理 | 发现登录或验证问题后暂停，提供本人操作验证的流程 |
 | 演示模式 | 虚构笔记、固定分析，不调用模型、不连接真实账号 |
 
@@ -137,10 +137,10 @@ GitHub Actions 执行 JavaScript 回归测试、演示模式检查、Windows 启
 
 运行 `.\scripts\打包发布.ps1` 生成可发布的源码 ZIP，详见 [发布说明](docs/RELEASING.md)。
 
-发布包采用文件白名单，排除 API Key、Cookie、个人账号配置、日记、真实互动记录、截图、运行日志、下载程序和缓存。测试样例使用虚构账号。工作台数据仍留在你自己的 `data/`，密钥文件为本地明文，请妥善保存。
+发布包采用文件白名单，排除 API Key、Cookie、个人账号配置、日记、真实互动记录、截图、运行日志、下载程序和缓存。测试样例使用虚构账号。工作台数据仍留在你自己的 `data/`，请妥善保存。
 
-项目仅绑定本机地址。涉及真实账号的操作应遵守平台规则、尊重内容作者，并由账号持有人决定是否发送；遇到验证需本人完成。
+Ciallo～(∠・ω< )⌒★
 
 ## 来源与许可
 
-本项目原创部分使用 [MIT](LICENSE)，修改版小红书服务使用 [Apache-2.0](upstream/xiaohongshu-mcp/LICENSE)。来源和修改范围见 [NOTICE.md](NOTICE.md)。本项目与小红书、DeepSeek 官方无隶属关系。
+本项目原创部分使用 [MIT](LICENSE)，修改版小红书服务使用 [Apache-2.0](upstream/xiaohongshu-mcp/LICENSE)。来源和修改范围见 [NOTICE.md](NOTICE.md)。
