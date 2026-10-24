@@ -110,17 +110,6 @@ data/                        本机运行时生成，不发布
 vendor/                      下载工具、构建产物、缓存，不发布
 ```
 
-```mermaid
-flowchart LR
-    UI[本地工作台] --> W[阅读与草稿工作流]
-    DSH[DSH 唤醒会话] --> CLI[fish 命令行]
-    CLI --> W
-    W --> M[DeepSeek API]
-    W --> S[本机小红书服务]
-    S --> B[登录后的浏览器]
-    W --> D[本地数据与日记]
-```
-
 ## 开发与验证
 
 ```powershell
