@@ -1,0 +1,66 @@
+{
+  "enabled": true,
+  "persona": {
+    "name": "小鲸鱼",
+    "ownerTitle": "主人",
+    "selfClaim": "我"
+  },
+  "night": {
+    "windows": [
+      {
+        "start": "20:00",
+        "end": "24:00",
+        "wakes": 1
+      }
+    ],
+    "skipChance": 0.3,
+    "minWakesPerWindow": 1,
+    "maxWakesPerDay": 2
+  },
+  "topics": [],
+  "feed": {
+    "source": "auto",
+    "candidates": 5,
+    "shortlist": 3,
+    "deep": 2,
+    "local": {
+      "enabled": true,
+      "city": "北京",
+      "count": 3
+    },
+    "sort": "最新",
+    "publish": "一周内",
+    "filters": false
+  },
+  "share": {
+    "enabled": true,
+    "mentionOwner": false
+  },
+  "like": {
+    "enabled": true,
+    "daily": 10
+  },
+  "reply": {
+    "ownerUserId": "",
+    "ownerDirect": true,
+    "strangerPolicy": "draft"
+  },
+  "visit": {
+    "enabled": true,
+    "chance": 0.3,
+    "cooldownHours": 72
+  },
+  "listen": {
+    "enabled": true,
+    "intervalSec": 300,
+    "allDay": false,
+    "limit": 20
+  },
+  "diary": {
+    "push": true
+  },
+  "notify": {
+    "type": "workbench",
+    "url": ""
+  }
+}
