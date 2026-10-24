@@ -34,5 +34,6 @@ jobs:
           go-version-file: upstream/xiaohongshu-mcp/go.mod
           cache-dependency-path: upstream/xiaohongshu-mcp/go.sum
       - name: Checked service tests and build
-        shell: powershell
+        # GitHub writes inline run scripts as UTF-8; pwsh preserves Chinese paths.
+        shell: pwsh
         run: ./scripts/构建评论修复版.ps1
