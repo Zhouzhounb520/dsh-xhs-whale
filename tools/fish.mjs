@@ -131,9 +131,9 @@ async function help() {
   feed [--n 5] [--deep 2] [--topic 关键词] [--source auto|feed|search]
                           自己刷一轮：候选 → 精读 → 摘要（1–3 分钟）
   inbox [--all]           收件箱：谁回复了你、是谁、还能不能回（--scan 强制立即扫一次）
-  visit [--comment <id>]  不带参数列待回访；带 ID 读取对方主页并精读作品，不点赞、不发评论
-  visit --prepare --run <id> --note <id> --message "…" [--mention]  保存留言，--mention 标记手动真实 @ 主人
-  visit --tasks          查看手动回访任务
+  visit [--comment <id>]  不带参数列待回访；带触发评论 ID 自动精读最新作品、预览、点赞并留言
+  visit --prepare --run <id> --note <id> --message "…" [--mention]  兼容旧手动待办；正常自动回访不需要这一步
+  visit --tasks          查看回访结果和历史手动待办
   diary [--book letter|private] [--show] [--tail 2000]
                           看/写日记（不给 --text 就是看）
   quota                   今天的发送记录（不设每日上限）
@@ -324,7 +324,7 @@ async function reply() {
     return;
   }
   out(`✓ ${r.status === 'sent' ? '已发出' : '已提交'}（${r.draftId}）`);
-  if (r.revisit?.eligible) out(`这次安排回访 ${r.revisit.name || '对方'}：运行 fish visit --comment ${commentId}，只阅读、准备留言并提醒主人手动完成，不点赞、不发送。`);
+  if (r.revisit?.eligible) out(`这次安排回访 ${r.revisit.name || '对方'}：运行 fish visit --comment ${commentId}，自动精读最新作品、预览、点赞并留言；若守护已完成，不重复执行。`);
   if (r.mentionVerified) out('✓ 已核验评论中的主人提及；通知是否送达由小红书决定。');
   if (r.verification) out(`  ${r.verification}`);
 }
@@ -373,10 +373,14 @@ async function comment() {
     else if (mentionOwner === false) out('真实 @：不加（这条只留一句普通评论）');
     if (r.preparation?.stage) out(`提交前检查：${r.preparation.stage}（尚未发送）`);
     out(`今日已评论 ${r.quota.sharesToday} 条（不设每日上限）`);
-    out('\n确认无误后加 --go 真的发送。');
+    if (mentionOwner && !r.mentions?.length) out('⚠ 本次未准备真实主人提及，请检查分享设置；不能记为已 @。');
+    out(mentionOwner ? '\n确认无误后保留 --note、--message、--mention，将 --dry 换成 --go 发送。' : '\n确认无误后保留 --note、--message、--no-mention，将 --dry 换成 --go 发送。');
     return;
   }
   out(`✓ ${r.status === 'sent' ? '已发出' : '已提交'}（${r.draftId}）`);
+  if (mentionOwner) out(r.status === 'sent' && r.mentionVerified === true
+    ? '✓ 评论和真实主人提及均已核验；小红书通知是否送达未知。'
+    : '⚠ 本次未确认真实主人提及成功，请记录实际状态；已提交或结果不确定时不要重发。');
   if (r.verification) out(`  ${r.verification}`);
 }
 
