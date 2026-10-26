@@ -127,12 +127,8 @@
               <option value="direct">也直接回（不推荐）</option>
             </select></label>
             <p class="hint">同一条笔记 7 天内只分享一次；同一条评论永远只回一次。所有发送还要过「允许发送评论」主开关。</p>
-            <label class="check"><input name="visitEnabled" type="checkbox">回复后偶尔去评论者的作品串门</label>
-            <div class="number-grid">
-              <label>回访概率 %<input name="visitChance" type="number" min="0" max="100" value="30"></label>
-              <label>同一人间隔（小时）<input name="visitCooldown" type="number" min="1" max="720" value="72"></label>
-            </div>
-            <p class="hint">只阅读作品、准备留言并提醒主人手动完成；不自动点赞或发送，每批最多回访一人。</p>
+            <label class="check"><input name="visitEnabled" type="checkbox">同一人累计留言两条后自动回访</label>
+            <p class="hint">只累计小鲸鱼自己帖子下的不同留言，可跨帖子，其他人留言不清零。达到两条后精读对方主页最新一篇作品，预览核验后点赞并留言；同一作品不重复评论，每轮最多回访一人。发送和点赞开关、点赞额度仍适用。</p>
           </div>
           <div class="box"><h2><span class="step-number">05</span>监听与推送</h2>
             <label class="check"><input name="listenEnabled" type="checkbox">监听谁回复了它</label>

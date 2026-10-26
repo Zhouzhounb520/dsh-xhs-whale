@@ -299,8 +299,6 @@ function fillFishForm(cfg) {
   f.elements.ownerDirect.checked = !!cfg.reply?.ownerDirect;
   f.elements.strangerPolicy.value = cfg.reply?.strangerPolicy || 'draft';
   f.elements.visitEnabled.checked = cfg.visit?.enabled !== false;
-  f.elements.visitChance.value = Math.round((cfg.visit?.chance ?? 0.3) * 100);
-  f.elements.visitCooldown.value = cfg.visit?.cooldownHours ?? 72;
   f.elements.listenEnabled.checked = !!cfg.listen?.enabled;
   f.elements.listenAllDay.checked = !!cfg.listen?.allDay;
   f.elements.listenInterval.value = cfg.listen?.intervalSec ?? 300;
@@ -330,7 +328,7 @@ function collectFishConfig() {
       },
       filters: f.elements.filtersEnabled.checked,
     },
-    visit: { enabled: f.elements.visitEnabled.checked, chance: Number(f.elements.visitChance.value) / 100, cooldownHours: Number(f.elements.visitCooldown.value) },
+    visit: { enabled: f.elements.visitEnabled.checked },
     share: { enabled: f.elements.shareEnabled.checked, mentionOwner: f.elements.mentionOwner.checked },
     like: { enabled: f.elements.likeEnabled.checked, daily: Number(f.elements.likeDaily.value) },
     reply: { ownerUserId: f.elements.ownerUserId.value.trim(), ownerDirect: f.elements.ownerDirect.checked,
